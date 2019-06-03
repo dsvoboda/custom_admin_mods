@@ -1,0 +1,10 @@
+services:
+  custom_admin_mods.twig_extension:
+    arguments: ['@renderer']
+    class: Drupal\custom_admin_mods\TwigExtension\CustomTwigFunctions
+    tags:
+      - { name: twig.extension }
+  custom_admin_mods.route_subscriber:
+    class: Drupal\custom_admin_mods\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }

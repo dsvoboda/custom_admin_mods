@@ -1,0 +1,7 @@
+name: Custom Admin Mods
+description: "Provides numerous changes to the usability of Drupal 8 for our customers."
+type: module
+package: Custom
+core: 8.x
+dependencies:
+- inline_entity_form:inline_entity_form

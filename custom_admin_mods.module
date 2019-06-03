@@ -1,0 +1,43 @@
+<?php
+/**
+ * Implements hook_inline_entity_form_reference_form_alter().
+ */
+function custom_admin_mods_inline_entity_form_reference_form_alter(&$reference_form, &$form_state) {
+	
+	$field_name = $reference_form['#parents'][0]; // gets the field name e.g. field_name
+	$entity_type = $reference_form['#entity_type']; // gets the entity type, e.g. node
+	$bundles = $reference_form['entity_id']['#selection_settings']['target_bundles']; // get the bundles the autocomplete field had associated with it
+	
+	$entity_ids = [];
+	
+	foreach($bundles as $type) {
+		$query = \Drupal::entityQuery($entity_type);
+		$query->condition('status',1); // only published nodes
+		$query->condition('type',$type); // of a certain content type
+		$entity_ids = array_merge($entity_ids, $query->execute());
+	}
+	// build the options array to use in your replacement select element
+	$options = array();
+	foreach($entity_ids as $id) {
+		$entity = \Drupal::entityTypeManager()->getStorage($entity_type)->load($id);
+		$bundle_name = ucwords(str_replace('_',' ',$entity->bundle()));
+		$options[$bundle_name][$id] = $entity->label() . ' - '.$id;
+	}
+	
+	$reference_form['entity_id']['#type'] = 'select';
+	$reference_form['entity_id']['#options'] = $options;
+
+}
+/**
+ * Implements hook_form_alter().
+ */
+function custom_admin_mods_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+	/* @var Drupal\Core\Entity\FieldableEntityInterface $entity */
+	$formObject = $form_state->getFormObject();
+	if ($formObject instanceof \Drupal\Core\Entity\EntityFormInterface) {
+		$entity = $formObject->getEntity();
+		if ($entity->getEntityTypeId() === 'node') {
+			$form['#attached']['library'][] = 'bridges/admin';
+		}
+	}
+}
